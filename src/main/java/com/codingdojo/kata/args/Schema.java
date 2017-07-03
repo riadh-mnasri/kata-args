@@ -4,14 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Schema {
+    private Map<String, String> expectedArguments = new HashMap<>();
 
-    private Map<String, Argument> expectedArguments = null;
-
-    public Schema(Map<String, Argument> expectedArguments) {
+    public Schema(Map<String, String> expectedArguments) {
         this.expectedArguments = expectedArguments;
     }
 
-    public Map<String, Argument> getExpectedArguments() {
+    public Map<String, String> getExpectedArguments() {
         return expectedArguments;
     }
 }

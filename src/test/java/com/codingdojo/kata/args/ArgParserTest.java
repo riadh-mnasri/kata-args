@@ -4,6 +4,7 @@ package com.codingdojo.kata.args;
 import com.google.common.base.Splitter;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.util.Lists;
+import org.assertj.core.util.Maps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,60 +12,37 @@ import org.junit.Test;
 import java.util.*;
 
 public class ArgParserTest {
-    
-    ArgParser argParser;
+
+    ArgParser argParser = null;
 
     @Before
     public void setUp() throws Exception {
-
+        argParser = new ArgParser();
     }
 
     @Test
-    public void should_flag_with_minus_sign() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("-p", new Argument('p', true, Arrays.asList("toto")));
-        Schema schema = new Schema(expectedArguments);
-        argParser = new ArgParser(schema);
-        Assertions.assertThat(argParser.validate("-p")).isTrue();
-    }
-
-
-    @Test
-    public void should_flag_be_one_character_with_minus_sign() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("-g", new Argument('g', false, Lists.emptyList()));
-        Schema schema = new Schema(expectedArguments);
-        argParser = new ArgParser(schema);
-        Assertions.assertThat(argParser.validate("-gg")).isFalse();
-    }
-
-
-    @Test
-    public void should_flag_have_one_value() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("-p", new Argument('p', true, Arrays.asList("toto")));
-        Schema schema = new Schema(expectedArguments);
-        Assertions.assertThat(argParser.validate("-p toto")).isTrue();
+    public void test_one_argument_without_Schema() throws Exception {
+        argParser = new ArgParser();
+        Assertions.assertThat(argParser.validate("-p", new Schema(Collections.emptyMap()))).isFalse();
     }
 
     @Test
-    public void should_have_many_flags_with_many_arguments() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("-p", new Argument('p', true, Arrays.asList("toto")));
-        expectedArguments.put("-t", new Argument('t', true, Arrays.asList("titi")));
-        Schema schema = new Schema(expectedArguments);
-        Assertions.assertThat(argParser.validate("-p toto -t titi")).isTrue();
-        //Assertions.assertThat(argParser.validate("-p toto -s")).isTrue();
+    public void test_one_argument_with_Schema() throws Exception {
+        Map<String, String> expectedArguments = new HashMap<>();
+        expectedArguments.put("p", "boolean");
+        argParser = new ArgParser();
+        Assertions.assertThat(argParser.validate("-p", new Schema(expectedArguments))).isTrue();
     }
 
     @Test
-    public void should_arguments_match_schema() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("-p", new Argument('p', true, Arrays.asList("toto")));
-        Schema schema = new Schema(expectedArguments);
-        ArgParser argParser = new ArgParser(schema);
-
-
+    public void test_many_arguments_with_Schema() throws Exception {
+        //-l -p 8080 -d /usr/logs
+        Map<String, String> expectedArguments = new HashMap<>();
+        expectedArguments.put("l", "boolean");
+        expectedArguments.put("p", "integer");
+        expectedArguments.put("d", "string");
+        argParser = new ArgParser();
+        Assertions.assertThat(argParser.validate("-l -p 8080 -d /usr/logs", new Schema(expectedArguments))).isTrue();
     }
 
     @After

@@ -1,41 +1,51 @@
 package com.codingdojo.kata.args;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
+import java.util.*;
 
 public class ArgParser {
 
-    private Schema schema;
+    public boolean validate(String args, Schema schema) {
+        if (StringUtils.isEmpty(args)) {
+            throw new IllegalArgumentException("Arguments could not be empty !");
+        }
+        Preconditions.checkNotNull(schema);
+        Map<String, String> expectedArguments = schema.getExpectedArguments();
+        Map<String, String> parsedArguments = parseArguments(args);
 
-    public ArgParser(Schema schema) {
-        this.schema = schema;
+        return isMatchingSchema(expectedArguments, parsedArguments);
     }
 
-    public boolean validate(String args) {
-        if (isFlag(args)) {
-            return true;
-        } else {
-            List<String> splitArguments = Splitter.on(" ").splitToList(args);
-            for (int i = 0; i < splitArguments.size(); i++) {
-                if (isFlag(splitArguments.get(i)) && !StringUtils.isEmpty(splitArguments.get(i+1))) {
-                    return true;
-                }
+    private boolean isMatchingSchema(Map<String, String> expectedArguments, Map<String, String> parsedArguments) {
+        for (Map.Entry<String, String> entry : parsedArguments.entrySet()) {
+            System.out.println("Option : " + entry.getKey() + " Value : " + entry.getValue());
+            if (!expectedArguments.containsKey(entry.getKey())) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
-    private boolean isFlag(String argument) {
-        return argument.startsWith("-") && argument.length() == 2;
-    }
+    private Map<String, String> parseArguments(String s) {
+        Map<String, String> parsedArguments = new HashMap<>();
+        List<String> splitArguments = Splitter.on(" ").splitToList(s);
 
-    private boolean isValue(String argumentValue) {
-        if (StringUtils.isEmpty(argumentValue)) {
-            return true;
-        } else {
-            return !argumentValue.startsWith("-");
+        for (ListIterator<String> listIterator = splitArguments.listIterator(); listIterator.hasNext(); ) {
+            String element = listIterator.next();
+            if (element.startsWith("-")) {
+                String nextElement = listIterator.next();
+                if (!nextElement.startsWith("-")) {
+                    parsedArguments.put(element.substring(1), String.valueOf(nextElement));
+                } else {
+                    parsedArguments.put(element.substring(1), "");
+                }
+                listIterator.previous();
+            }
         }
+
+        return parsedArguments;
     }
 }
