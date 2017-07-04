@@ -13,20 +13,38 @@ public class ArgParser {
             throw new IllegalArgumentException("Arguments could not be empty !");
         }
         Preconditions.checkNotNull(schema);
-        Map<String, String> expectedArguments = schema.getExpectedArguments();
+        Map<String, Argument> expectedArguments = schema.getExpectedArguments();
         Map<String, String> parsedArguments = parseArguments(args);
 
         return isMatchingSchema(expectedArguments, parsedArguments);
     }
 
-    private boolean isMatchingSchema(Map<String, String> expectedArguments, Map<String, String> parsedArguments) {
-        for (Map.Entry<String, String> entry : parsedArguments.entrySet()) {
-            System.out.println("Option : " + entry.getKey() + " Value : " + entry.getValue());
-            if (!expectedArguments.containsKey(entry.getKey())) {
-                return false;
+    private boolean isMatchingSchema(Map<String, Argument> expectedArguments, Map<String, String> parsedArguments) {
+        boolean result = true;
+        if(expectedArguments.isEmpty() || parsedArguments.isEmpty()){
+            return false;
+        }
+        result = isFlagAndTypeMatching(expectedArguments, parsedArguments);
+
+        return result;
+    }
+
+    private boolean isFlagAndTypeMatching(Map<String, Argument> expectedArguments, Map<String, String> parsedArguments) {
+        //TODO Rework
+        boolean result = false;
+        for (Map.Entry<String, String> parsedArgument : parsedArguments.entrySet()) {
+            String key = parsedArgument.getKey();
+            String value = parsedArgument.getValue();
+            System.out.println("Option : " + key + " Value : " + value);
+            if (!expectedArguments.containsKey(key)) {
+                result = false;
+                break;
+            }else{
+                Argument expectedArg = expectedArguments.get(key);
+                expectedArg.getValueType();
             }
         }
-        return true;
+        return result;
     }
 
     private Map<String, String> parseArguments(String s) {
@@ -36,16 +54,19 @@ public class ArgParser {
         for (ListIterator<String> listIterator = splitArguments.listIterator(); listIterator.hasNext(); ) {
             String element = listIterator.next();
             if (element.startsWith("-")) {
-                String nextElement = listIterator.next();
-                if (!nextElement.startsWith("-")) {
-                    parsedArguments.put(element.substring(1), String.valueOf(nextElement));
+                if (listIterator.hasNext()) {
+                    String nextElement = listIterator.next();
+                    if (!nextElement.startsWith("-")) {
+                        parsedArguments.put(element.substring(1), String.valueOf(nextElement));
+                    } else {
+                        parsedArguments.put(element.substring(1), "");
+                    }
+                    listIterator.previous();
                 } else {
                     parsedArguments.put(element.substring(1), "");
                 }
-                listIterator.previous();
             }
         }
-
         return parsedArguments;
     }
 }
