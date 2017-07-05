@@ -77,7 +77,7 @@ public class ArgParser {
     }
 
 
-    //-l -p 8080 -d /usr/logs
+    //Arguments sample :  -l -p 8080 -d /usr/logs
     private Map<String, String> parseArguments(String args) {
         Map<String, String> parsedArguments = new HashMap<>();
         List<String> tokens = Splitter.on(" ").splitToList(args);
@@ -101,12 +101,12 @@ public class ArgParser {
         return parsedArguments;
     }
 
-    //a:boolean b:integer c:string
+    //Schema sample : "a:boolean b:integer c:string"
     private Map<String, String> parseSchema(String schema) {
         Map<String, String> parsedSchema = new HashMap<>();
-        List<String> tokens = Splitter.on(" ").splitToList(schema);
-        for (int i = 0; i < tokens.size(); i++) {
-            String token = tokens.get(i);
+        List<String> splitSchemaTokens = Splitter.on(" ").splitToList(schema);
+        for (int i = 0; i < splitSchemaTokens.size(); i++) {
+            String token = splitSchemaTokens.get(i);
             List<String> arg = Splitter.on(":").splitToList(token);
             if (arg.size() == 2) {
                 LOGGER.info("schema flag :: " + arg.get(0) + " schema type :: " + arg.get(1));
@@ -114,18 +114,6 @@ public class ArgParser {
             }
         }
         return parsedSchema;
-    }
-
-    public Map<String, String> getParsedSchema() {
-        return parsedSchema;
-    }
-
-    public Map<String, String> getParsedArguments() {
-        return parsedArguments;
-    }
-
-    public Map<String, Object> getTypedArguments() {
-        return typedArguments;
     }
 
     public static void main(String[] args) {
@@ -144,4 +132,17 @@ public class ArgParser {
             System.err.println("KO - Invalid arguments based on your schema !!");
         }
     }
+
+    public Map<String, String> getParsedSchema() {
+        return parsedSchema;
+    }
+
+    public Map<String, String> getParsedArguments() {
+        return parsedArguments;
+    }
+
+    public Map<String, Object> getTypedArguments() {
+        return typedArguments;
+    }
+
 }

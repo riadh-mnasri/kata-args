@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class ArgParserTest {
 
-    ArgParser argParser = null;
+    private ArgParser argParser = null;
 
     @Before
     public void setUp() throws Exception {
