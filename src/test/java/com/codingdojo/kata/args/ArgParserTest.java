@@ -23,75 +23,56 @@ public class ArgParserTest {
 
     @Test
     public void test_with_one_argument_and_no_schema() throws Exception {
-        Assertions.assertThat(argParser.validate("-l", "")).isFalse();
+        Assertions.assertThat(argParser.validate("", "-l")).isFalse();
     }
 
     @Test
     public void test_with_many_arguments_and_no_schema() throws Exception {
-        Assertions.assertThat(argParser.validate("-l -p 8080 -d /usr/logs", "")).isFalse();
+        Assertions.assertThat(argParser.validate("", "-l -p 8080 -d /usr/logs")).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_non_letter_schema() throws Exception {
-       Assertions.assertThat(argParser.validate("-l","123")).isFalse();
+       Assertions.assertThat(argParser.validate("123","-l")).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void test_invalid_argument_format() throws Exception {
-        argParser.validate("####", "test");
+        argParser.validate("test", "####");
     }
 
     @Test
     public void test_simple_boolean_value() throws Exception {
-        Assertions.assertThat(argParser.validate("-a","a:boolean")).isTrue();
+        Assertions.assertThat(argParser.validate("a:boolean","-a")).isTrue();
         Boolean arg =  (Boolean) argParser.getTypedArguments().get("a");
         Assertions.assertThat(arg).isEqualTo(false);
     }
 
     @Test
     public void test_multiple_boolean_arguments() throws Exception {
-        Assertions.assertThat(argParser.validate("-a true -b false", "a:boolean b:boolean")).isTrue();
+        Assertions.assertThat(argParser.validate("a:boolean b:boolean", "-a true -b false")).isTrue();
     }
 
     @Test
     public void test_simple_string_value() throws Exception {
-        Assertions.assertThat(argParser.validate("-s toto", "s:string")).isTrue();
+        Assertions.assertThat(argParser.validate("s:string", "-s toto")).isTrue();
     }
 
     @Test
     public void test_multiple_string_value() throws Exception {
-        Assertions.assertThat(argParser.validate("-s toto -b titi", "s:string b:string")).isTrue();
+        Assertions.assertThat(argParser.validate("s:string b:string", "-s toto -b titi")).isTrue();
     }
 
     @Test
     public void test_multiple_mixed_types() throws Exception {
-        Assertions.assertThat(argParser.validate("-s toto -n 5466", "s:string n:integer")).isTrue();
+        Assertions.assertThat(argParser.validate("l:boolean p:integer d:string", "-l -p 8080 -d /usr/logs")).isTrue();
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void test_missing_string_value() throws Exception {
-        Assertions.assertThat(argParser.validate("-s", "s:string")).isFalse();
+        Assertions.assertThat(argParser.validate("s:string", "-s")).isFalse();
     }
-
-
-    /*
-    testSpacesInFormat
-    testSimpleIntPresent
-    testInvalidInteger
-    testMissingInteger
-    testSimpleDoublePresent
-    testInvalidDouble
-    testMissingDouble
-    testStringArray
-    testMissingStringArrayElement
-    manyStringArrayElements
-    MapArgument
-    malFormedMapArgument
-    oneMapArgument
-    testExtraArguments
-    testExtraArgumentsThatLookLikeFlags
-     */
 
     @After
     public void tearDown() throws Exception {

@@ -13,14 +13,14 @@ public class ArgParser {
     private final static Logger LOGGER = LoggerFactory.getLogger(ArgParser.class);
 
     private static final String SCHEMA_REGEXP = "([a-z]?:[a-z\\s]+)*";
-    private static final String ARGUMENTS_REGEXP = "(-[a-z]?\\s*[a-z0-9\\s]*)*";
+    private static final String ARGUMENTS_REGEXP = "(-[a-z]?\\s*[a-z0-9/\\s]*)*";
 
     private Map<String, String> parsedSchema = Maps.newHashMap();
     private Map<String, String> parsedArguments = Maps.newHashMap();
     private Map<String, Object> typedArguments = Maps.newHashMap();
 
 
-    public boolean validate(String arguments, String schema) {
+    public boolean validate(String schema, String arguments) {
         boolean result = false;
         if (StringUtils.isEmpty(arguments) || StringUtils.isEmpty(schema)) {
             return false;
@@ -56,12 +56,13 @@ public class ArgParser {
     private Object getArgumentValue(String arg, String valueType) {
         Object result = null;
         LOGGER.info("getArgumentValue >>>> arg ::" + arg + " type :: " + valueType);
+        String argValue = parsedArguments.get(arg);
         if ("boolean".equals(valueType)) {
-            result = Boolean.valueOf(parsedArguments.get(arg));
+            result = Boolean.valueOf(argValue);
         } else if ("integer".equals(valueType)) {
-            result = Integer.valueOf(parsedArguments.get(arg));
+            result = Integer.valueOf(argValue);
         } else if ("string".equals(valueType)) {
-            result = parsedArguments.get(arg);
+            result = argValue;
         } else {
             throw new IllegalArgumentException("Unknown argument type");
         }
@@ -101,7 +102,7 @@ public class ArgParser {
             String token = tokens.get(i);
             List<String> arg = Splitter.on(":").splitToList(token);
             if (arg.size() == 2) {
-                System.out.println("schema flag :: " + arg.get(0) + " schema type :: " + arg.get(1));
+                LOGGER.info("schema flag :: " + arg.get(0) + " schema type :: " + arg.get(1));
                 parsedSchema.put(arg.get(0), arg.get(1));
             }
         }
@@ -118,5 +119,24 @@ public class ArgParser {
 
     public Map<String, Object> getTypedArguments() {
         return typedArguments;
+    }
+
+    public static void main(String[] args) {
+        ArgParser argParser = new ArgParser();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter your schema: ");
+        String schema = scanner.nextLine();
+        System.out.print("Enter your arguments: ");
+        String arguments = scanner.nextLine();
+        System.out.println("You have indicated schema :: [" + schema + "] and arguments :: ["+ arguments+"]");
+        boolean result = argParser.validate(schema, arguments);
+        if (result == true) {
+            System.out.println("OK - Your arguments are valid");
+            System.out.println(argParser.getParsedArguments());
+        } else {
+            System.err.println("KO - Invalid arguments based on your schema !!");
+        }
+
+
     }
 }
