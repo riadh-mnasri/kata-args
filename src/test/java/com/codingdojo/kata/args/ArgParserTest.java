@@ -4,7 +4,6 @@ package com.codingdojo.kata.args;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ArgParserTest {
@@ -33,7 +32,7 @@ public class ArgParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_non_letter_schema() throws Exception {
-       Assertions.assertThat(argParser.validate("123","-l")).isFalse();
+        Assertions.assertThat(argParser.validate("123", "-l")).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -43,8 +42,8 @@ public class ArgParserTest {
 
     @Test
     public void test_simple_boolean_value() throws Exception {
-        Assertions.assertThat(argParser.validate("a:boolean","-a")).isTrue();
-        Boolean arg =  (Boolean) argParser.getTypedArguments().get("a");
+        Assertions.assertThat(argParser.validate("a:boolean", "-a")).isTrue();
+        Boolean arg = (Boolean) argParser.getTypedArguments().get("a");
         Assertions.assertThat(arg).isEqualTo(true);
     }
 

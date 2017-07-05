@@ -143,7 +143,5 @@ public class ArgParser {
         } else {
             System.err.println("KO - Invalid arguments based on your schema !!");
         }
-
-
     }
 }
