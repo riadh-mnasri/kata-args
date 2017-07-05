@@ -45,7 +45,7 @@ public class ArgParserTest {
     public void test_simple_boolean_value() throws Exception {
         Assertions.assertThat(argParser.validate("a:boolean","-a")).isTrue();
         Boolean arg =  (Boolean) argParser.getTypedArguments().get("a");
-        Assertions.assertThat(arg).isEqualTo(false);
+        Assertions.assertThat(arg).isEqualTo(true);
     }
 
     @Test
@@ -68,10 +68,9 @@ public class ArgParserTest {
         Assertions.assertThat(argParser.validate("l:boolean p:integer d:string", "-l -p 8080 -d /usr/logs")).isTrue();
     }
 
-    @Test
-    @Ignore
+    @Test(expected = IllegalArgumentException.class)
     public void test_missing_string_value() throws Exception {
-        Assertions.assertThat(argParser.validate("s:string", "-s")).isFalse();
+        Assertions.assertThat(argParser.validate("s:string", "-s"));
     }
 
     @After

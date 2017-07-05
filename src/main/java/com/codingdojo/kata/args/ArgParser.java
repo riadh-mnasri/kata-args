@@ -58,13 +58,20 @@ public class ArgParser {
         LOGGER.info("getArgumentValue >>>> arg ::" + arg + " type :: " + valueType);
         String argValue = parsedArguments.get(arg);
         if ("boolean".equals(valueType)) {
-            result = Boolean.valueOf(argValue);
+            if (argValue.isEmpty()) {
+                result = true;
+            } else {
+                result = Boolean.valueOf(argValue);
+            }
         } else if ("integer".equals(valueType)) {
             result = Integer.valueOf(argValue);
         } else if ("string".equals(valueType)) {
             result = argValue;
         } else {
             throw new IllegalArgumentException("Unknown argument type");
+        }
+        if (String.valueOf(result).isEmpty()) {
+            throw new IllegalArgumentException("Argument value couldn't be empty for [" + arg + "]");
         }
         return result;
     }
@@ -128,7 +135,7 @@ public class ArgParser {
         String schema = scanner.nextLine();
         System.out.print("Enter your arguments: ");
         String arguments = scanner.nextLine();
-        System.out.println("You have indicated schema :: [" + schema + "] and arguments :: ["+ arguments+"]");
+        System.out.println("You have indicated schema :: [" + schema + "] and arguments :: [" + arguments + "]");
         boolean result = argParser.validate(schema, arguments);
         if (result == true) {
             System.out.println("OK - Your arguments are valid");
