@@ -1,16 +1,11 @@
 package com.codingdojo.kata.args;
 
 
-import com.google.common.collect.Maps;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.*;
-import java.util.Map.Entry;
-
-import static java.lang.System.out;
 
 public class ArgParserTest {
 
@@ -22,54 +17,81 @@ public class ArgParserTest {
     }
 
     @Test
-    public void test_one_argument_without_Schema() throws Exception {
-        Assertions.assertThat(argParser.validate("-p", new Schema(Collections.emptyMap()))).isFalse();
+    public void test_with_no_argument_and_no_schema() throws Exception {
+        Assertions.assertThat(argParser.validate("", "")).isFalse();
+    }
+
+    @Test
+    public void test_with_one_argument_and_no_schema() throws Exception {
+        Assertions.assertThat(argParser.validate("-l", "")).isFalse();
+    }
+
+    @Test
+    public void test_with_many_arguments_and_no_schema() throws Exception {
+        Assertions.assertThat(argParser.validate("-l -p 8080 -d /usr/logs", "")).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void test_without_argument_with_Schema() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("p", new Argument("p", "boolean", "true"));
-        argParser.validate("", new Schema(expectedArguments));
+    public void test_non_letter_schema() throws Exception {
+       Assertions.assertThat(argParser.validate("-l","123")).isFalse();
     }
 
-
-    @Test
-    public void test_one_argument_with_Schema() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("p", new Argument("p", "boolean", "true"));
-        Assertions.assertThat(argParser.validate("-p", new Schema(expectedArguments))).isTrue();
+    @Test(expected = IllegalArgumentException.class)
+    public void test_invalid_argument_format() throws Exception {
+        argParser.validate("####", "test");
     }
 
     @Test
-    public void test_many_arguments_with_Schema() throws Exception {
-        //-l -p 8080 -d /usr/logs
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("l", new Argument("l", "boolean", "true"));
-        expectedArguments.put("p", new Argument("p", "integer", "8080"));
-        expectedArguments.put("d", new Argument("d", "string", "/usr/logs"));
-        Assertions.assertThat(argParser.validate("-l -p 8080 -d /usr/logs", new Schema(expectedArguments))).isTrue();
+    public void test_simple_boolean_value() throws Exception {
+        Assertions.assertThat(argParser.validate("-a","a:boolean")).isTrue();
+        Boolean arg =  (Boolean) argParser.getTypedArguments().get("a");
+        Assertions.assertThat(arg).isEqualTo(false);
     }
 
     @Test
-    public void test_invalid_format_argument() throws Exception {
-        Assertions.assertThat(argParser.validate("toto", new Schema(Collections.emptyMap()))).isFalse();
+    public void test_multiple_boolean_arguments() throws Exception {
+        Assertions.assertThat(argParser.validate("-a true -b false", "a:boolean b:boolean")).isTrue();
     }
 
     @Test
-    public void test_argument_with_non_corresponding_schema() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("l", new Argument("l", "boolean", "true"));
-        Assertions.assertThat(argParser.validate("-t test", new Schema(expectedArguments))).isFalse();
+    public void test_simple_string_value() throws Exception {
+        Assertions.assertThat(argParser.validate("-s toto", "s:string")).isTrue();
     }
 
     @Test
-    public void test_argument_with_schema_having_types() throws Exception {
-        Map<String, Argument> expectedArguments = new HashMap<>();
-        expectedArguments.put("l", new Argument("l", "boolean", "false"));
-        Assertions.assertThat(argParser.validate("-l true", new Schema(expectedArguments)));
+    public void test_multiple_string_value() throws Exception {
+        Assertions.assertThat(argParser.validate("-s toto -b titi", "s:string b:string")).isTrue();
     }
 
+    @Test
+    public void test_multiple_mixed_types() throws Exception {
+        Assertions.assertThat(argParser.validate("-s toto -n 5466", "s:string n:integer")).isTrue();
+    }
+
+    @Ignore
+    @Test
+    public void test_missing_string_value() throws Exception {
+        Assertions.assertThat(argParser.validate("-s", "s:string")).isFalse();
+    }
+
+
+    /*
+    testSpacesInFormat
+    testSimpleIntPresent
+    testInvalidInteger
+    testMissingInteger
+    testSimpleDoublePresent
+    testInvalidDouble
+    testMissingDouble
+    testStringArray
+    testMissingStringArrayElement
+    manyStringArrayElements
+    MapArgument
+    malFormedMapArgument
+    oneMapArgument
+    testExtraArguments
+    testExtraArgumentsThatLookLikeFlags
+     */
 
     @After
     public void tearDown() throws Exception {

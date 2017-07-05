@@ -1,57 +1,79 @@
 package com.codingdojo.kata.args;
 
-import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
 
 public class ArgParser {
 
-    public boolean validate(String args, Schema schema) {
-        if (StringUtils.isEmpty(args)) {
-            throw new IllegalArgumentException("Arguments could not be empty !");
-        }
-        Preconditions.checkNotNull(schema);
-        Map<String, Argument> expectedArguments = schema.getExpectedArguments();
-        Map<String, String> parsedArguments = parseArguments(args);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ArgParser.class);
 
-        return isMatchingSchema(expectedArguments, parsedArguments);
-    }
+    private static final String SCHEMA_REGEXP = "([a-z]?:[a-z\\s]+)*";
+    private static final String ARGUMENTS_REGEXP = "(-[a-z]?\\s*[a-z0-9\\s]*)*";
 
-    private boolean isMatchingSchema(Map<String, Argument> expectedArguments, Map<String, String> parsedArguments) {
-        boolean result = true;
-        if(expectedArguments.isEmpty() || parsedArguments.isEmpty()){
+    private Map<String, String> parsedSchema = Maps.newHashMap();
+    private Map<String, String> parsedArguments = Maps.newHashMap();
+    private Map<String, Object> typedArguments = Maps.newHashMap();
+
+
+    public boolean validate(String arguments, String schema) {
+        boolean result = false;
+        if (StringUtils.isEmpty(arguments) || StringUtils.isEmpty(schema)) {
             return false;
         }
-        result = isFlagAndTypeMatching(expectedArguments, parsedArguments);
+        // a:boolean b:boolean
+        if (!schema.matches(SCHEMA_REGEXP)) {
+            throw new IllegalArgumentException("Bad Schema");
+        }
+        if (!arguments.matches(ARGUMENTS_REGEXP)) {
+            throw new IllegalArgumentException("Bad Argument");
+        }
 
-        return result;
+        parsedSchema = parseSchema(schema);
+        parsedArguments = parseArguments(arguments);
+
+        for (Map.Entry<String, String> schemaToken : parsedSchema.entrySet()) {
+            Object argumentValue = getArgumentValue(schemaToken.getKey(), schemaToken.getValue());
+            typedArguments.put(schemaToken.getKey(), argumentValue);
+        }
+        LOGGER.info("Typed arguments :: " + Arrays.asList(typedArguments));
+        return isArgumentsMatchingSchema(parsedSchema, typedArguments);
     }
 
-    private boolean isFlagAndTypeMatching(Map<String, Argument> expectedArguments, Map<String, String> parsedArguments) {
-        //TODO Rework
+    public boolean isArgumentsMatchingSchema(Map<String, String> parsedSchema, Map<String, Object> typedArguments) {
         boolean result = false;
-        for (Map.Entry<String, String> parsedArgument : parsedArguments.entrySet()) {
-            String key = parsedArgument.getKey();
-            String value = parsedArgument.getValue();
-            System.out.println("Option : " + key + " Value : " + value);
-            if (!expectedArguments.containsKey(key)) {
-                result = false;
-                break;
-            }else{
-                Argument expectedArg = expectedArguments.get(key);
-                expectedArg.getValueType();
-            }
+        for (Map.Entry<String, Object> parsedArgument : typedArguments.entrySet()) {
+            result = parsedSchema.containsKey(parsedArgument.getKey()) ? true : false;
         }
         return result;
     }
 
-    private Map<String, String> parseArguments(String s) {
-        Map<String, String> parsedArguments = new HashMap<>();
-        List<String> splitArguments = Splitter.on(" ").splitToList(s);
 
-        for (ListIterator<String> listIterator = splitArguments.listIterator(); listIterator.hasNext(); ) {
+    private Object getArgumentValue(String arg, String valueType) {
+        Object result = null;
+        LOGGER.info("getArgumentValue >>>> arg ::" + arg + " type :: " + valueType);
+        if ("boolean".equals(valueType)) {
+            result = Boolean.valueOf(parsedArguments.get(arg));
+        } else if ("integer".equals(valueType)) {
+            result = Integer.valueOf(parsedArguments.get(arg));
+        } else if ("string".equals(valueType)) {
+            result = parsedArguments.get(arg);
+        } else {
+            throw new IllegalArgumentException("Unknown argument type");
+        }
+        return result;
+    }
+
+
+    //-l -p 8080 -d /usr/logs
+    private Map<String, String> parseArguments(String args) {
+        Map<String, String> parsedArguments = new HashMap<>();
+        List<String> tokens = Splitter.on(" ").splitToList(args);
+        for (ListIterator<String> listIterator = tokens.listIterator(); listIterator.hasNext(); ) {
             String element = listIterator.next();
             if (element.startsWith("-")) {
                 if (listIterator.hasNext()) {
@@ -67,6 +89,34 @@ public class ArgParser {
                 }
             }
         }
+        LOGGER.info("Parsed arguments :: " + Arrays.asList(parsedArguments));
         return parsedArguments;
+    }
+
+    //a:boolean b:integer c:string
+    private Map<String, String> parseSchema(String schema) {
+        Map<String, String> parsedSchema = new HashMap<>();
+        List<String> tokens = Splitter.on(" ").splitToList(schema);
+        for (int i = 0; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            List<String> arg = Splitter.on(":").splitToList(token);
+            if (arg.size() == 2) {
+                System.out.println("schema flag :: " + arg.get(0) + " schema type :: " + arg.get(1));
+                parsedSchema.put(arg.get(0), arg.get(1));
+            }
+        }
+        return parsedSchema;
+    }
+
+    public Map<String, String> getParsedSchema() {
+        return parsedSchema;
+    }
+
+    public Map<String, String> getParsedArguments() {
+        return parsedArguments;
+    }
+
+    public Map<String, Object> getTypedArguments() {
+        return typedArguments;
     }
 }
