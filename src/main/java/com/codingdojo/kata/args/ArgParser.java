@@ -2,7 +2,6 @@ package com.codingdojo.kata.args;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
-import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -13,17 +12,19 @@ public class ArgParser {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ArgParser.class);
 
+    private String SCHEMA_REGEXP = "([a-z]?:[a-z\\s]+)*";
+    private String ARGUMENTS_REGEXP = "(-[a-z]?\\s*[a-z0-9/\\s]*)*";
+
     private Map<String, String> parsedSchema = Maps.newHashMap();
     private Map<String, String> parsedArguments = Maps.newHashMap();
     private Map<String, Object> typedArguments = Maps.newHashMap();
 
     public boolean validate(String schema, String arguments) {
-        boolean result = false;
-        if (StringUtils.isEmpty(schema) || !schema.matches("([a-z]?:[a-z\\s]+)*")) {
+        if (StringUtils.isEmpty(schema) || !schema.matches(SCHEMA_REGEXP)) {
             throw new IllegalArgumentException("Bad schema !!");
         }
 
-        if (StringUtils.isEmpty(arguments) || !arguments.matches("(-[a-z]?\\s*[a-z0-9/\\s]*)*")) {
+        if (StringUtils.isEmpty(arguments) || !arguments.matches(ARGUMENTS_REGEXP)) {
             throw new IllegalArgumentException("Bad arguments !!");
         }
 
@@ -33,10 +34,7 @@ public class ArgParser {
 
         typedArguments = parseTypes(parsedArguments);
 
-        result = isArgumentsMatchingSchema(parsedSchema, typedArguments);
-        LOGGER.info("Typed arguments :: " + Arrays.asList(typedArguments));
-
-        return result;
+        return isArgumentsMatchingSchema(parsedSchema, typedArguments);
     }
 
     //Schema sample : "a:boolean b:integer c:string"
@@ -85,6 +83,14 @@ public class ArgParser {
         return typedArguments;
     }
 
+    public boolean isArgumentsMatchingSchema(Map<String, String> parsedSchema, Map<String, Object> typedArguments) {
+        boolean result = false;
+        for (Map.Entry<String, Object> typedArgument : typedArguments.entrySet()) {
+            result = parsedSchema.containsKey(typedArgument.getKey()) ? true : false;
+        }
+        return result;
+    }
+
     private Object getArgumentValue(String arg, String valueType) {
         Object result = null;
         LOGGER.info("Arg ::" + arg + " type :: " + valueType);
@@ -100,7 +106,7 @@ public class ArgParser {
                 if (argValue.isEmpty()) {
                     throw new IllegalArgumentException("Value should not be empty for" + arg);
                 } else {
-                    result = Ints.tryParse(argValue);
+                    result = Integer.valueOf(argValue);
                 }
             } else if ("string".equals(valueType)) {
                 if (argValue.isEmpty()) {
@@ -112,18 +118,11 @@ public class ArgParser {
                 throw new IllegalArgumentException("Unknown argument type");
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Unknown argument type for [" + arg + "]");
+            throw new IllegalArgumentException("Argument type doesn't match value for argument [" + arg + "]");
         }
         return result;
     }
 
-    public boolean isArgumentsMatchingSchema(Map<String, String> parsedSchema, Map<String, Object> typedArguments) {
-        boolean result = false;
-        for (Map.Entry<String, Object> typedArgument : typedArguments.entrySet()) {
-            result = parsedSchema.containsKey(typedArgument.getKey()) ? true : false;
-        }
-        return result;
-    }
 
     public static void main(String[] args) {
         ArgParser argParser = new ArgParser();
@@ -136,22 +135,13 @@ public class ArgParser {
         boolean result = argParser.validate(schema, arguments);
         if (result == true) {
             System.out.println("OK - Your arguments are valid");
-            System.out.println(argParser.getParsedArguments());
+            System.out.println(argParser.getTypedArguments());
         } else {
             System.err.println("KO - Invalid arguments based on your schema !!");
         }
     }
 
-    public Map<String, String> getParsedSchema() {
-        return parsedSchema;
-    }
-
-    public Map<String, String> getParsedArguments() {
-        return parsedArguments;
-    }
-
     public Map<String, Object> getTypedArguments() {
         return typedArguments;
     }
-
 }
