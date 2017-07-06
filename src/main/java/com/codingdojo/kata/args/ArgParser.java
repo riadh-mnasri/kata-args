@@ -2,7 +2,6 @@ package com.codingdojo.kata.args;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
-import com.google.common.primitives.Booleans;
 import com.google.common.primitives.Ints;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,13 +98,13 @@ public class ArgParser {
                 }
             } else if ("integer".equals(valueType)) {
                 if (argValue.isEmpty()) {
-                    throw new IllegalArgumentException("Value should not be empty for"+ arg);
+                    throw new IllegalArgumentException("Value should not be empty for" + arg);
                 } else {
                     result = Ints.tryParse(argValue);
                 }
             } else if ("string".equals(valueType)) {
                 if (argValue.isEmpty()) {
-                    throw new IllegalArgumentException("Value should not be empty for"+ arg);
+                    throw new IllegalArgumentException("Value should not be empty for" + arg);
                 } else {
                     result = argValue;
                 }

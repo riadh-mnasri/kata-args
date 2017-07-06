@@ -23,7 +23,7 @@ public class ArgParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void test_with_one_argument_and_no_schema() throws Exception {
-        Assertions.assertThat(argParser.validate("","-l")).isFalse();
+        Assertions.assertThat(argParser.validate("", "-l")).isFalse();
     }
 
 
