@@ -1,13 +1,9 @@
 package com.codingdojo.kata.args;
 
 
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 public class ArgParserTest {
 
