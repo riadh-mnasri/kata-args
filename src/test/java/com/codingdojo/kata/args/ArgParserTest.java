@@ -9,44 +9,63 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(JUnitParamsRunner.class)
 public class ArgParserTest {
-
-    private ArgParser argParser = null;
 
     @Before
     public void setUp() throws Exception {
-        argParser = new ArgParser();
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    @Parameters({
-            ",test",
-            "test, ",
-            ", -l",
-            ", -l -p 8080 -d /usr/logs",
-            "123, -l",
-            "test, ###",
-            "a:string b:integer, -a azerty -b toto",
-            "x:string y:string, -x toto -y"})
-    public void test_limit_cases(String schema, String arguments) throws Exception {
-        argParser.validate(schema, arguments);
+    @Test//"",toto
+    public void test_with_no_schema_and_any_argument() throws Exception {
     }
 
-    @Test
-    @Parameters({
-            "a:boolean, -a",
-            "a:boolean b:boolean, -a true -b false",
-            "s:string, -s toto",
-            "a:string b:string, -a toto -b titi"
-    })
-    public void test_nominal_cases(String schema, String arguments) throws Exception {
-        Assertions.assertThat(argParser.validate(schema, arguments)).isTrue();
+    @Test//toto, ""
+    public void test_with_bad_schema_and_no_argument() throws Exception {
+    }
+
+    @Test//"",-l
+    public void test_with_one_argument_and_no_schema() throws Exception {
+    }
+
+    @Test//"", -l -p 8080 -d /usr/logs
+    public void test_with_many_arguments_and_no_schema() throws Exception {
+    }
+
+    @Test//123, -l
+    public void test_non_letter_schema() throws Exception {
+    }
+
+    @Test//test ###
+    public void test_invalid_argument_format() throws Exception {
+    }
+
+    @Test//a:boolean -a
+    public void test_simple_boolean_value() throws Exception {
+    }
+
+    @Test//a:boolean b:boolean -a true -b false
+    public void test_multiple_boolean_arguments() throws Exception {
+    }
+
+    @Test//s:string -s toto
+    public void test_simple_string_value() throws Exception {
+    }
+
+    @Test//a:string b:string -a toto -b titi
+    public void test_multiple_string_value() throws Exception {
+    }
+
+    @Test//a:string b:integer -a azerty -b 343332
+    public void test_multiple_mixed_types_with_bad_type() throws Exception {
+    }
+
+    @Test//x:string y:string -x toto -y
+    public void test_missing_string_value() throws Exception {
     }
 
     @After
     public void tearDown() throws Exception {
-      argParser = null;
+
     }
 
 }
