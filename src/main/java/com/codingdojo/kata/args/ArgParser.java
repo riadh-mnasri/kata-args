@@ -40,9 +40,9 @@ public class ArgParser {
     //Schema sample : "a:boolean b:integer c:string"
     private Map<String, String> parseSchema(String schema) {
         Map<String, String> parsedSchema = new HashMap<>();
-        List<String> splitSchemTokens = Splitter.on(" ").splitToList(schema);
-        for (int i = 0; i < splitSchemTokens.size(); i++) {
-            String schemaToken = splitSchemTokens.get(i);
+        List<String> splitSchemaTokens = Splitter.on(" ").splitToList(schema);
+        for (int i = 0; i < splitSchemaTokens.size(); i++) {
+            String schemaToken = splitSchemaTokens.get(i);
             List<String> arg = Splitter.on(":").splitToList(schemaToken);
             if (arg.size() == 2) {
                 parsedSchema.put(arg.get(0), arg.get(1));
